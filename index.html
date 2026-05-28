@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bhagavad Gita AI Chatbot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Laila:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --peacock-blue: #003b73;
+            --peacock-teal: #007d81;
+            --peacock-green: #005f39;
+            --peacock-gold: #bf953f;
+            --peacock-purple: #4b0082;
+            --message-user: #fcf1d4;
+            --message-bot: #e0f2f1;
+        }
+
+        body {
+            font-family: 'Laila', sans-serif;
+            background: linear-gradient(135deg, #001f3f 0%, #003366 25%, #006666 50%, #004d40 75%, #1a0033 100%);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .glass-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .chat-header {
+            background: linear-gradient(to right, var(--peacock-blue), var(--peacock-purple));
+            border-bottom: 2px solid var(--peacock-gold);
+        }
+
+        .user-message {
+            background: linear-gradient(135deg, #fdfcf0 0%, #f7e8a1 100%);
+            color: #4a3701;
+            border-left: 4px solid var(--peacock-gold);
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .bot-message {
+            background: linear-gradient(135deg, #ffffff 0%, #e0f2f1 100%);
+            color: #002d2d;
+            border-left: 4px solid var(--peacock-teal);
+            animation: slideInLeft 0.3s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .feather-icon {
+            filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.6));
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .loader {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid var(--peacock-gold);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .prose-style h3 { font-size: 1.1em; font-weight: 700; color: var(--peacock-blue); margin-bottom: 0.5rem; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 2px; }
+        .prose-style blockquote {
+            border-left: 3px solid var(--peacock-gold);
+            padding: 0.5rem 1rem;
+            margin: 0.75rem 0;
+            background: rgba(191, 149, 63, 0.05);
+            font-style: italic;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+        ::-webkit-scrollbar-thumb { background: var(--peacock-teal); border-radius: 10px; }
+
+        .send-btn {
+            background: linear-gradient(to bottom, var(--peacock-teal), var(--peacock-blue));
+            transition: all 0.3s ease;
+        }
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--peacock-teal);
+        }
+
+        .ai-tool-btn {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(5px);
+            transition: all 0.2s ease;
+        }
+        .ai-tool-btn:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-2px);
+        }
+
+        /* New Image styling */
+        .generated-image {
+            max-width: 100%;
+            border-radius: 1rem;
+            margin-top: 0.5rem;
+            border: 2px solid var(--peacock-gold);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            animation: fadeIn 1s ease-in;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .tts-btn {
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+        .tts-btn:hover {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="chat-container w-full max-w-2xl glass-container rounded-3xl flex flex-col h-[90vh] overflow-hidden">
+        <header class="chat-header text-white p-5 flex items-center justify-between shadow-lg relative z-10">
+            <div class="flex items-center gap-4">
+                <div class="bg-white/10 p-2 rounded-2xl border border-white/20 feather-icon">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 22C12 22 17 18 19 13C21 8 18 4 12 2C6 4 3 8 5 13C7 18 12 22 12 22Z" fill="#007d81" stroke="#FFD700" stroke-width="1"/>
+                        <path d="M12 18C12 18 15 15.5 16 12C17 8.5 15.5 6 12 4.5C8.5 6 7 8.5 8 12C9 15.5 12 18 12 18Z" fill="#4B0082" stroke="white" stroke-width="0.5"/>
+                        <circle cx="12" cy="10" r="1.5" fill="#FFD700"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight">GitaGuidance AI</h1>
+                    <p class="text-xs text-blue-200 uppercase tracking-widest font-semibold">Eternal Vedic Wisdom</p>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button id="summarize-btn" title="Summarize Journey" class="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all border border-white/10">
+                    ✨
+                </button>
+                <button id="settings-btn" class="p-2 hover:bg-white/10 rounded-xl transition-all border border-transparent hover:border-white/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <main id="chat-window" class="flex-1 p-6 overflow-y-auto space-y-6 bg-transparent relative">
+            <div id="welcome-msg" class="flex justify-start">
+                <div class="bot-message p-5 rounded-2xl rounded-bl-none max-w-lg shadow-xl border border-teal-100/20">
+                    <p class="font-bold text-teal-800 text-lg mb-1">Pranam 🙏</p>
+                    <p class="leading-relaxed">I am your spiritual guide. Share your heart's burden, and we shall find clarity through the verses of the Shrimad Bhagavad Gita.</p>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                         <button onclick="sendQuickMessage('I am feeling very anxious')" class="text-xs ai-tool-btn py-1 px-3 rounded-full text-teal-900 border border-teal-200">Feeling anxious</button>
+                         <button onclick="sendQuickMessage('Help me manage work stress')" class="text-xs ai-tool-btn py-1 px-3 rounded-full text-teal-900 border border-teal-200">Work stress</button>
+                         <button onclick="sendQuickMessage('How to find peace?')" class="text-xs ai-tool-btn py-1 px-3 rounded-full text-teal-900 border border-teal-200">Seeking peace</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <div id="action-bar" class="px-5 py-2 flex flex-wrap justify-center gap-3 bg-black/10">
+            <button id="mantra-btn" class="text-xs font-bold text-white/80 py-1.5 px-4 rounded-full ai-tool-btn border border-white/20 hover:text-white">
+                ✨ Personal Mantra
+            </button>
+            <button id="visualize-btn" class="text-xs font-bold text-white/80 py-1.5 px-4 rounded-full ai-tool-btn border border-white/20 hover:text-white">
+                🎨 Visual Meditation
+            </button>
+        </div>
+
+        <footer class="p-5 bg-black/20 border-t border-white/10 relative z-10">
+            <form id="chat-form" class="flex items-center gap-3">
+                <input type="text" id="user-input" placeholder="Type your dilemma here..." class="flex-1 p-4 bg-white/10 border border-white/20 rounded-2xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all shadow-inner" autocomplete="off">
+                <button type="submit" id="send-button" class="send-btn text-white p-4 rounded-2xl flex items-center justify-center w-14 h-14 shadow-lg">
+                    <svg id="send-icon" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                    <div id="loader" class="loader hidden"></div>
+                </button>
+            </form>
+        </footer>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-96 max-w-full overflow-hidden">
+            <div class="bg-indigo-900 p-6 text-white">
+                <h2 class="text-xl font-bold">Divine Settings</h2>
+                <p class="text-xs opacity-70 mt-1 uppercase tracking-wider">Session Memory & Controls</p>
+            </div>
+            <div class="p-6">
+                <div class="bg-red-50 p-4 rounded-2xl mb-6 border border-red-100">
+                    <h3 class="text-sm font-bold text-red-800 mb-1">Clear Memory</h3>
+                    <p class="text-xs text-red-600/70 mb-3">Remove all stored conversation history from this device.</p>
+                    <button id="clear-history-btn" class="text-xs font-bold bg-white text-red-600 px-4 py-2 rounded-lg border border-red-200 hover:bg-red-600 hover:text-white transition-all shadow-sm">
+                        Confirm Reset
+                    </button>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-2">
+                    <button id="close-modal" class="px-5 py-2 text-gray-500 hover:text-gray-800 font-semibold transition-colors">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = ""; // Provided by execution environment
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const chatWindow = document.getElementById('chat-window');
+        const sendButton = document.getElementById('send-button');
+        const sendIcon = document.getElementById('send-icon');
+        const loader = document.getElementById('loader');
+        const settingsBtn = document.getElementById('settings-btn');
+        const mantraBtn = document.getElementById('mantra-btn');
+        const visualizeBtn = document.getElementById('visualize-btn');
+        const summarizeBtn = document.getElementById('summarize-btn');
+        const settingsModal = document.getElementById('settings-modal');
+        const closeModal = document.getElementById('close-modal');
+        const clearHistoryBtn = document.getElementById('clear-history-btn');
+
+        let chatHistory = JSON.parse(localStorage.getItem('gita_chat_history')) || [];
+
+        window.onload = () => {
+            if (chatHistory.length > 0) {
+                document.getElementById('welcome-msg').style.display = 'none';
+                chatHistory.forEach(turn => {
+                    addMessageToChat(turn.role === 'model' ? 'bot' : 'user', turn.parts[0].text, false);
+                });
+            }
+        };
+
+        settingsBtn.onclick = () => settingsModal.classList.remove('hidden');
+        closeModal.onclick = () => settingsModal.classList.add('hidden');
+        clearHistoryBtn.onclick = () => {
+            chatHistory = [];
+            localStorage.removeItem('gita_chat_history');
+            location.reload();
+        };
+
+        const gitaDatabase = {
+          "chapters": [
+            { "n": "Chapter 2: Sankhya Yoga", "v": [
+              { "ref": "2.11", "s": "अशोच्यानन्वशोचस्त्वं प्रज्ञावादांश्च भाषसे...", "t": "The wise lament neither for the living nor the dead. Do not grieve for what is not worthy of grief." },
+              { "ref": "2.14", "s": "मात्रास्पर्शास्तु कौन्तेय शीतोष्णसुखदुःखदाः...", "t": "Happiness and distress are temporary, like winter and summer. They arise from sense perception; one must learn to tolerate them." },
+              { "ref": "2.47", "s": "कर्मण्येवाधिकारस्ते मा फलेषु कदाचन...", "t": "You have a right to perform your duty, but you are not entitled to the fruits of action. Never consider yourself the cause of results." },
+              { "ref": "2.48", "s": "योगस्थः कुरु कर्माणि सङ्गं त्यक्त्वा धनञ्जय...", "t": "Perform your duty with equanimity, abandoning all attachment to success or failure. Such equanimity is called yoga." }
+            ]},
+            { "n": "Chapter 3: Karma Yoga", "v": [
+              { "ref": "3.19", "s": "तस्मादसक्तः सततं कार्यं कर्म समाचर...", "t": "Act as a matter of duty without attachment, for by working without attachment one attains the Supreme." },
+              { "ref": "3.35", "s": "श्रेयान्स्वधर्मो विगुणः परधर्मात्स्वनुष्ठितात्...", "t": "It is far better to perform one's own duty, even if imperfectly, than another's duty perfectly." }
+            ]},
+            { "n": "Chapter 6: Dhyana Yoga", "v": [
+              { "ref": "6.5", "s": "उद्धरेदात्मनात्मानं नात्मानमवसादयेत्...", "t": "Elevate yourself through your mind. The mind is the friend of the soul, but it can also be the enemy." }
+            ]},
+            { "n": "Chapter 16: Divine & Demoniac Nature", "v": [
+                { "ref": "16.21", "s": "त्रिविधं नरकस्येदं द्वारं नाशनमात्मनः...", "t": "Lust, anger, and greed are the three gates leading to hell. Every sane man should give these up." }
+            ]},
+            { "n": "Chapter 18: Conclusion", "v": [
+              { "ref": "18.66", "s": "सर्वधर्मान्परित्यज्य मामेकं शरणं व्रज...", "t": "Abandon all varieties of religion and just surrender unto Me. I shall deliver you from all sinful reactions. Do not fear." }
+            ]}
+          ]
+        };
+
+        const systemPrompt = `You are "GitaGuidance AI," a wise and compassionate spiritual guide. Your purpose is to provide solutions based EXCLUSIVELY on the Bhagavad Gita.
+
+        IMPORTANT: You have memory of previous messages. Reference previous contexts if the user is following up on a problem.
+
+        1. Analyze the current problem in the context of the entire conversation.
+        2. Use the provided shlokas as the foundation.
+        3. Structure: 
+           - Compassionate acknowledgement.
+           - Key Verses (Sanskrit & Translation).
+           - Practical application of the Gita's wisdom.
+        4. Tone: Calm, encouraging, and profound. Format with Markdown.`;
+
+        function sendQuickMessage(text) {
+            userInput.value = text;
+            chatForm.dispatchEvent(new Event('submit'));
+        }
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            addMessageToChat('user', message);
+            userInput.value = '';
+            toggleLoading(true);
+
+            try {
+                const shlokas = findShlokas(message);
+                const queryContent = `User Dilemma: ${message}\n\nRelevant Context Shlokas:\n${shlokas}\n\nProvide guidance based on the Bhagavad Gita.`;
+                
+                const historyForApi = chatHistory.length > 0 ? chatHistory : [];
+                const botResponse = await getAIResponse(queryContent, historyForApi, systemPrompt);
+                
+                chatHistory.push({ role: "user", parts: [{ text: message }] });
+                chatHistory.push({ role: "model", parts: [{ text: botResponse }] });
+                saveHistory();
+
+                addMessageToChat('bot', botResponse);
+
+            } catch (error) {
+                console.error("Error:", error);
+                addMessageToChat('bot', `I am having trouble connecting to the divine wisdom. Please try again.`);
+            } finally {
+                toggleLoading(false);
+            }
+        });
+
+        // ✨ FEATURE: PERSONAL MANTRA GENERATOR
+        mantraBtn.onclick = async () => {
+            if (chatHistory.length === 0) {
+                addMessageToChat('bot', "Please share your dilemma first so I can craft a mantra specifically for you.");
+                return;
+            }
+            toggleLoading(true);
+            try {
+                const prompt = "Based on our conversation so far, generate a short, powerful 1-sentence spiritual mantra or affirmation that the user can repeat to stay grounded. Start with '✨ Your Personal Mantra:'";
+                const mantra = await getAIResponse(prompt, chatHistory, "You are a mantra creator based on Vedic wisdom.");
+                addMessageToChat('bot', mantra);
+            } catch (e) {
+                addMessageToChat('bot', "Could not generate mantra at this time.");
+            } finally {
+                toggleLoading(false);
+            }
+        };
+
+        // ✨ FEATURE: JOURNEY SUMMARIZER
+        summarizeBtn.onclick = async () => {
+            if (chatHistory.length === 0) {
+                addMessageToChat('bot', "You have not yet begun your journey. Share your thoughts first.");
+                return;
+            }
+            toggleLoading(true);
+            try {
+                const prompt = "Please summarize our entire conversation so far into a concise 'Spiritual Growth Report'. Highlight the main challenges the user faced and the key Gita lessons they should remember. Format with bullet points.";
+                const summary = await getAIResponse(prompt, chatHistory, "You are a spiritual scribe summarizing a seeker's journey.");
+                addMessageToChat('bot', "✨ **Your Spiritual Journey Summary**\n\n" + summary);
+            } catch (e) {
+                addMessageToChat('bot', "Could not summarize your journey at this time.");
+            } finally {
+                toggleLoading(false);
+            }
+        };
+
+        // ✨ FEATURE: VISUAL MEDITATION (IMAGE GEN)
+        visualizeBtn.onclick = async () => {
+            if (chatHistory.length === 0) {
+                addMessageToChat('bot', "Tell me your thoughts first, so I can create a meditation visual for you.");
+                return;
+            }
+            toggleLoading(true);
+            addMessageToChat('bot', "Generating your visual meditation. Please wait...");
+            try {
+                const context = chatHistory.slice(-2).map(h => h.parts[0].text).join(' ');
+                const prompt = `A highly detailed, serene digital painting of a spiritual scene representing ${context}. Peacock feather motifs, glowing aura, divine light, traditional Indian art style, high resolution, meditative atmosphere.`;
+                const imageUrl = await generateImage(prompt);
+                
+                const imgWrap = document.createElement('div');
+                imgWrap.innerHTML = `<img src="${imageUrl}" class="generated-image" alt="Visual Meditation">`;
+                chatWindow.appendChild(imgWrap);
+                chatWindow.scrollTo({ top: chatWindow.scrollHeight, behavior: 'smooth' });
+            } catch (e) {
+                addMessageToChat('bot', "Could not generate the visual meditation at this time.");
+            } finally {
+                toggleLoading(false);
+            }
+        };
+
+        function saveHistory() {
+            localStorage.setItem('gita_chat_history', JSON.stringify(chatHistory.slice(-20)));
+        }
+
+        function findShlokas(query) {
+            const keywords = query.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+            let context = [];
+            gitaDatabase.chapters.forEach(ch => {
+                ch.v.forEach(v => {
+                    const match = keywords.some(k => v.t.toLowerCase().includes(k));
+                    if (match) context.push(`${v.ref}: ${v.s} - ${v.t}`);
+                });
+            });
+            return context.slice(0, 3).join("\n\n") || "General teaching: 2.47 - Perform your duty without attachment to results.";
+        }
+
+        function addMessageToChat(sender, text, scroll = true) {
+            const wrap = document.createElement('div');
+            wrap.className = 'flex flex-col ' + (sender === 'user' ? 'items-end' : 'items-start');
+            
+            const row = document.createElement('div');
+            row.className = 'flex items-center gap-2 ' + (sender === 'user' ? 'flex-row-reverse' : 'flex-row');
+
+            const el = document.createElement('div');
+            el.className = 'p-5 rounded-2xl max-w-[85%] shadow-md ' + (sender === 'user' ? 'user-message rounded-br-none' : 'bot-message rounded-bl-none prose-style');
+            
+            if (sender === 'user') el.textContent = text;
+            else {
+                el.innerHTML = text
+                    .replace(/### (.*)/g, '<h3 class="font-bold text-blue-800">$1</h3>')
+                    .replace(/\*\*(.*)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\n> (.*)/g, '<blockquote>$1</blockquote>')
+                    .replace(/\n/g, '<br>');
+                
+                // Add TTS Button for Bot
+                const ttsBtn = document.createElement('button');
+                ttsBtn.className = 'tts-btn p-1 text-teal-600 hover:text-teal-800';
+                ttsBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
+                ttsBtn.onclick = () => speakText(text);
+                row.appendChild(ttsBtn);
+            }
+            
+            row.appendChild(el);
+            wrap.appendChild(row);
+            chatWindow.appendChild(wrap);
+            if(scroll) chatWindow.scrollTo({ top: chatWindow.scrollHeight, behavior: 'smooth' });
+        }
+
+        function toggleLoading(isLoading) {
+            loader.className = isLoading ? 'loader' : 'loader hidden';
+            sendIcon.className = isLoading ? 'hidden' : 'h-7 w-7 rotate-45';
+            sendButton.disabled = isLoading;
+            if (!isLoading) userInput.focus();
+        }
+
+        // --- GEMINI API CALLS ---
+
+        async function getAIResponse(userQuery, history, systemInstruction) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const payload = {
+                contents: [...history, { role: "user", parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemInstruction }] }
+            };
+            const result = await apiRequest(url, payload);
+            return result.candidates?.[0]?.content?.parts?.[0]?.text || "I am unable to provide wisdom at this moment.";
+        }
+
+        async function generateImage(promptText) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
+            const payload = { instances: { prompt: promptText }, parameters: { sampleCount: 1 } };
+            const result = await apiRequest(url, payload);
+            return `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
+        }
+
+        async function speakText(text) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+            const payload = {
+                contents: [{ parts: [{ text: `Say calmly and meditatively: ${text.replace(/[*#]/g, '')}` }] }],
+                generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } } } }
+            };
+            const result = await apiRequest(url, payload);
+            const pcmData = result.candidates[0].content.parts[0].inlineData.data;
+            const audioBlob = pcmToWav(pcmData, 24000);
+            const audio = new Audio(URL.createObjectURL(audioBlob));
+            audio.play();
+        }
+
+        async function apiRequest(url, payload) {
+            const fetchWithRetry = async (retries = 5, delay = 1000) => {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    if (retries > 0) {
+                        await new Promise(r => setTimeout(r, delay));
+                        return fetchWithRetry(retries - 1, delay * 2);
+                    }
+                    throw error;
+                }
+            };
+            return await fetchWithRetry();
+        }
+
+        function pcmToWav(base64Pcm, sampleRate) {
+            const buffer = Uint8Array.from(atob(base64Pcm), c => c.charCodeAt(0)).buffer;
+            const wavHeader = new ArrayBuffer(44);
+            const view = new DataView(wavHeader);
+            const writeString = (offset, string) => { for (let i = 0; i < string.length; i++) view.setUint8(offset + i, string.charCodeAt(i)); };
+            writeString(0, 'RIFF');
+            view.setUint32(4, 36 + buffer.byteLength, true);
+            writeString(8, 'WAVE');
+            writeString(12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, 1, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true);
+            view.setUint16(34, 16, true);
+            writeString(36, 'data');
+            view.setUint32(40, buffer.byteLength, true);
+            return new Blob([wavHeader, buffer], { type: 'audio/wav' });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+{
+  "chapters": [
+    {
+      "chapter_number": 1,
+      "name": "Arjuna Vishada Yoga",
+      "summary": "Arjuna's Despair: The first chapter introduces the scene and Arjuna's emotional breakdown.",
+      "verses": [
+        {
+          "verse_number": 47,
+          "sanskrit": "संजय उवाच | एवमुक्त्वार्जुनः संख्ये रथोपस्थ उपाविशत् | विसृज्य सशरं चापं शोकसंविग्नमानसः ||47||",
+          "transliteration": "sañjaya uvāca | evamuktvārjunaḥ saṅkhye rathopastha upāviśat | visṛjya saśaraṃ cāpaṃ śokasaṃvignamānasaḥ ||47||",
+          "translation": "Sanjaya said: Having spoken thus, Arjuna cast aside his bow and arrows and sat down on the seat of the chariot, his mind overwhelmed with sorrow."
+        }
+      ]
+    },
+    {
+      "chapter_number": 2,
+      "name": "Sankhya Yoga",
+      "summary": "The Yoga of Knowledge: Krishna explains the eternal soul and the concept of duty.",
+      "verses": [
+        {
+          "verse_number": 47,
+          "sanskrit": "कर्मण्येवाधिकारस्ते मा फलेषु कदाचन | मा कर्मफलहेतुर्भूर्मा ते सङ्गोऽस्त्वकर्मणि ||47||",
+          "transliteration": "karmaṇyevādhikāraste mā phaleṣu kadācana | mā karmaphalaheturbhūrmā te saṅgo'stvakarmaṇi ||47||",
+          "translation": "You have a right to perform your prescribed duty, but you are not entitled to the fruits of action. Never consider yourself the cause of the results of your activities, and never be attached to not doing your duty."
+        }
+      ]
+    },
+    {
+      "chapter_number": 18,
+      "name": "Moksha Sannyasa Yoga",
+      "summary": "The Yoga of Liberation: Krishna summarizes all teachings, emphasizing surrender and devotion.",
+      "verses": [
+        {
+          "verse_number": 66,
+          "sanskrit": "सर्वधर्मान्परित्यज्य मामेकं शरणं व्रज | अहं त्वा सर्वपापेभ्यो मोक्षयिष्यामि मा शुचः ||66||",
+          "transliteration": "sarvadharmānparityajya māmekaṃ śaraṇaṃ vraja | ahaṃ tvā sarvapāpebhyo mokṣayiṣyāmi mā śucaḥ ||66||",
+          "translation": "Abandon all varieties of religion and just surrender unto Me. I shall deliver you from all sinful reactions. Do not fear."
+        }
+      ]
+    }
+  ]
+}
